@@ -11,9 +11,10 @@ import (
 )
 
 type ConfigJson struct {
-	NikePlusToken string `json:"nike_plus_token"`
-	StartTime     string `json:"start_time"`
-	EndTime       string `json:"end_time"`
+	NikePlusToken  string `json:"nike_plus_token"`
+	RunKeeperToken string `json:"runkeeper_token"`
+	StartTime      string `json:"start_time"`
+	EndTime        string `json:"end_time"`
 }
 
 type Config struct {
@@ -68,14 +69,19 @@ func main() {
 		return
 	}
 
-	np := nikeplus.New(config.NikePlusToken)
-	activities := np.Activities(config.StartTime, config.EndTime)
+	/*
+		np := nikeplus.New(config.NikePlusToken)
+		activities := np.Activities(config.StartTime, config.EndTime)
 
-	fmt.Printf("Exporting...\n")
-	nikeplus.Export(activities, "./nikeplus.bin")
-
+		fmt.Printf("Exporting...\n")
+		nikeplus.Export(activities, "./nikeplus.bin")
+	*/
 	fmt.Printf("Importing...\n")
-	importedActivities := nikeplus.Import("./nikeplus.bin")
+	activities := nikeplus.Import("./nikeplus.bin")
+	fmt.Printf("Loaded %d activities\n", len(activities))
 
-	fmt.Printf("%v\n", *(importedActivities[0].GPS.Waypoints[0]))
+	/*
+		rk := runkeeper.New(config.RunKeeperToken)
+		rk.UploadNikePlusActivities(activities[1:])
+	*/
 }

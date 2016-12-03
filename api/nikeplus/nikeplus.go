@@ -1,6 +1,7 @@
 package nikeplus
 
 import (
+	"fmt"
 	"sort"
 	"time"
 
@@ -76,6 +77,7 @@ func (np *NikePlus) Activities(start, end time.Time) []*Activity {
 
 	var activityList []*Activity
 	for _, v := range activities {
+		fmt.Printf("%v\n", v.StartTime)
 		np.FillMetricSummary(v)
 		np.FillGPS(v)
 		activityList = append(activityList, v)
@@ -87,12 +89,27 @@ func (np *NikePlus) Activities(start, end time.Time) []*Activity {
 }
 
 func (np *NikePlus) FillMetricSummary(a *Activity) {
-	_, body, _ := np.reqWithToken(activityDetailEndPoint(a.Id)).End()
-	metricSummaryJson, _, _, _ := jsonparser.Get([]byte(body), "metricSummary")
-	a.MetricSummary = NewMetricSummary(metricSummaryJson)
+	for {
+		resp, body, err := np.reqWithToken(activityDetailEndPoint(a.Id)).End()
+		if err == nil {
+			metricSummaryJson, _, _, _ := jsonparser.Get([]byte(body), "metricSummary")
+			a.MetricSummary = NewMetricSummary(metricSummaryJson)
+			break
+		} else {
+			fmt.Printf("%#v\n%v\n", resp, err)
+		}
+	}
+
 }
 
 func (np *NikePlus) FillGPS(a *Activity) {
-	_, body, _ := np.reqWithToken(activityGPSEndPoint(a.Id)).End()
-	a.GPS = NewGPS([]byte(body))
+	for {
+		resp, body, err := np.reqWithToken(activityGPSEndPoint(a.Id)).End()
+		if err == nil {
+			a.GPS = NewGPS([]byte(body))
+			break
+		} else {
+			fmt.Printf("%#v\n%v\n", resp, err)
+		}
+	}
 }
