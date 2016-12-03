@@ -84,8 +84,16 @@ func PathsFromNikePlusGPS(gps *nikeplus.GPS) []Path {
 			t = "end"
 		}
 
+		unit := time.Second
+		switch gps.IntervalUnit {
+		case "SEC":
+			unit = time.Second
+		case "MIN":
+			unit = time.Minute
+		}
+
 		p := Path{
-			Timestamp: (time.Duration(i*4106) * time.Millisecond).Seconds(),
+			Timestamp: (time.Duration(i*gps.IntervalMetric) * unit).Seconds(),
 			Latitude:  w.Latitude,
 			Longitude: w.Longitude,
 			Altitude:  w.Elevation,

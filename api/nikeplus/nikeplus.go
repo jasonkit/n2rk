@@ -77,6 +77,10 @@ func (np *NikePlus) Activities(start, end time.Time) []*Activity {
 
 	var activityList []*Activity
 	for _, v := range activities {
+		if v.StartTime.UnixNano() < start.UnixNano() {
+			continue
+		}
+
 		fmt.Printf("%v\n", v.StartTime)
 		np.FillMetricSummary(v)
 		np.FillGPS(v)

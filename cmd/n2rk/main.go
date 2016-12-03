@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jasonkit/n2rk/api/nikeplus"
+	"github.com/jasonkit/n2rk/api/runkeeper"
 )
 
 type ConfigJson struct {
@@ -47,12 +48,14 @@ func ReadConfig() *Config {
 	}
 
 	if startTime, err = time.ParseInLocation("2006-01-02", configJson.StartTime, time.Now().Location()); err != nil {
-		fmt.Printf("Invalid start_time value: %v\n", err)
-		return nil
+		rk := runkeeper.New(configJson.RunKeeperToken)
+		startTime = rk.LastRunningTime()
+		fmt.Printf("Using %v as start time\n", startTime)
 	}
 
 	if endTime, err = time.ParseInLocation("2006-01-02", configJson.EndTime, time.Now().Location()); err != nil {
 		endTime = time.Now()
+		fmt.Printf("Using %v as end time\n", endTime)
 	}
 
 	return &Config{
@@ -69,19 +72,21 @@ func main() {
 		return
 	}
 
-	/*
-		np := nikeplus.New(config.NikePlusToken)
-		activities := np.Activities(config.StartTime, config.EndTime)
+	np := nikeplus.New(config.NikePlusToken)
+	activities := np.Activities(config.StartTime, config.EndTime)
 
+	if len(activities) > 0 {
+		rk := runkeeper.New(config.RunKeeperToken)
+		rk.UploadNikePlusActivities(activities)
+	} else {
+		fmt.Printf("Nothing to upload.\n")
+	}
+
+	/*
 		fmt.Printf("Exporting...\n")
 		nikeplus.Export(activities, "./nikeplus.bin")
-	*/
-	fmt.Printf("Importing...\n")
-	activities := nikeplus.Import("./nikeplus.bin")
-	fmt.Printf("Loaded %d activities\n", len(activities))
-
-	/*
-		rk := runkeeper.New(config.RunKeeperToken)
-		rk.UploadNikePlusActivities(activities[1:])
+		fmt.Printf("Importing...\n")
+		activities := nikeplus.Import("./nikeplus.bin")
+		fmt.Printf("Loaded %d activities\n", len(activities))
 	*/
 }
